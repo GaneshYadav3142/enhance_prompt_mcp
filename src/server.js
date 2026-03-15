@@ -8,6 +8,7 @@ const { z } = require("zod");
 const { enhancePromptTool } = require("./tools/enhancePromt");
 const { classifyPromptTool } = require("./tools/classifyPromt");
 const { optimizePromptTool } = require("./tools/optimizePromt");
+require("dotenv").config(); // Load environment variables from .env file
 
 const server = new McpServer({
     name: "mcp-prompt-architect",
