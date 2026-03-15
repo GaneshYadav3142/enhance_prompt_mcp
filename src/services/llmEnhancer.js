@@ -2,7 +2,7 @@
 const OpenAI = require("openai");
 
 const client = new OpenAI({
-    apiKey: "", // uses OPENAI_API_KEY from env
+    apiKey: process.env.OPENAI_API_KEY, // uses OPENAI_API_KEY from env
 });
 
 async function enhanceWithLLM(userPrompt, category, strategies) {
