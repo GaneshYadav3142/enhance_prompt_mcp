@@ -2,7 +2,7 @@
   "name": "mcp_server",
   "version": "1.0.0",
   "description": "AI-powered prompt enhancement MCP server for Claude Desktop",
-  "main": "src/server.js",
+  "main": "src/index.js",
   "bin": {
     "prompt-architect-mcp": "src/server.js"
   },

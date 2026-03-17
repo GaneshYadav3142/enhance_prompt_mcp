@@ -1,6 +1,9 @@
 // services/llmEnhancer.js
 const OpenAI = require("openai");
-require("dotenv").config(); // Load environment variables from .env file
+// Load environment variables from .env file
+ if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config({ quiet: true });
+}
 
 const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // uses OPENAI_API_KEY from env
