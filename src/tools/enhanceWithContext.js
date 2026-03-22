@@ -1,4 +1,6 @@
 // src/tools/enhanceWithContext.js
+const { z } = require("zod");
+
 const { optimizePrompt } = require("../services/promptOptimizer");
 const { buildContextBlock } = require("../services/contextBuilder");
 const { resolveSessionId, getOrCreateSession } = require("../session/manager");
@@ -8,12 +10,14 @@ const enhanceWithContextTool = {
   description: "Enhance a prompt using full project context from your ongoing session",
 
   inputSchema: {
-    type: "object",
-    properties: {
-      prompt:     { type: "string", description: "The raw prompt to enhance" },
-      session_id: { type: "string", description: "Optional. Auto-detected from your project if omitted." }
-    },
-    required: ["prompt"]
+    // type: "object",
+    //  properties: {
+    //   prompt: { type: "string", description: "The raw prompt to enhance" },
+    //   session_id: { type: "string", description: "Optional. Auto-detected from your project if omitted." }
+    // },
+    // required: ["prompt"]
+    prompt: z.string().describe("The raw prompt to enhance"),
+    session_id: z.string().optional().describe("Auto-detected from git root if omitted")
   },
 
   execute: async ({ prompt, session_id }) => {
