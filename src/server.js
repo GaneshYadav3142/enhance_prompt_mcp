@@ -76,7 +76,6 @@ const server = new McpServer({
     capabilities: { tools: {} }
 });
 
-// ── helper ────────────────────────────────────────────────────────────────────
 function requireSessionId(session_id) {
     const sid = resolveSessionId(session_id);
     if (!sid) {
@@ -100,7 +99,6 @@ function requireSessionId(session_id) {
     return sid;
 }
 
-// ── V1: enhance_prompt (no context, quick one-off) ────────────────────────────
 server.tool(
     "enhance_prompt",
     "Enhance a user prompt using prompt architect engine",
@@ -118,7 +116,7 @@ server.tool(
     }
 );
 
-// ── V1: classify_prompt (kept, not actively used) ─────────────────────────────
+
 server.tool(
     "classify_prompt",
     "Classify user prompt category",
@@ -133,7 +131,6 @@ server.tool(
     }
 );
 
-// ── V1: optimize_prompt (kept, not actively used) ─────────────────────────────
 server.tool(
     "optimize_prompt",
     "Fully optimize user prompt using templates and strategies",
@@ -155,18 +152,7 @@ server.tool(
     }
 );
 
-// ── V2: enhance_prompt_with_context (THE main tool — does everything) ─────────
-//
-// What happens inside every single call:
-//   1. Resolve session ID (from input or git root)
-//   2. Auto-save user prompt to DB           ← no manual record_turn needed
-//   3. Read all context built up so far
-//   4. Enrich prompt with context block
-//   5. Enhance via OpenAI
-//   6. Auto-save enhanced result to DB       ← next call will have this as context
-//   7. Return enhanced prompt to user
-//
-// The user only ever calls THIS tool. Context grows silently in the background.
+
 server.tool(
     "enhance_prompt_with_context",
     "Enhance your prompt using the full context of your ongoing project conversation",
@@ -178,29 +164,26 @@ server.tool(
     },
     async ({ prompt, session_id }) => {
 
-        // 1. Resolve session
+
         const sid = requireSessionId(session_id);
         if (typeof sid === "object") return sid;
         getOrCreateSession(sid);
 
-        // 2. Auto-save user prompt — happens silently, user does nothing
         saveTurn(sid, "user", prompt);
 
-        // 3. Read all context built from previous turns
         const contextBlock = await buildContextBlock(sid);
 
-        // 4. Enrich prompt with context
+
         const enrichedPrompt = contextBlock
             ? `${contextBlock}\n\n${prompt}`
             : prompt;
 
-        // 5. Enhance via OpenAI
+
         const result = await optimizePrompt(enrichedPrompt);
 
-        // 6. Auto-save enhanced result — becomes context for next call
+
         saveTurn(sid, "assistant", result.enhancedPrompt);
 
-        // 7. Return to user
         return {
             content: [{
                 type: "text",
@@ -218,7 +201,7 @@ server.tool(
     }
 );
 
-// ── V2: pin_fact (intentional — user explicitly locks something in) ────────────
+
 server.tool(
     "pin_fact",
     "Pin an important fact to always include in your project context",
@@ -243,8 +226,6 @@ server.tool(
         };
     }
 );
-
-// ── V2: list_sessions (utility — see all your projects) ───────────────────────
 server.tool(
     "list_sessions",
     "List all your saved project sessions",
@@ -272,7 +253,7 @@ server.tool(
     }
 );
 
-// ── start ─────────────────────────────────────────────────────────────────────
+
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
