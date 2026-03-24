@@ -118,42 +118,6 @@ server.tool(
 
 
 server.tool(
-    "classify_prompt",
-    "Classify user prompt category",
-    {
-        prompt: z.string().describe("The prompt to classify")
-    },
-    async ({ prompt }) => {
-        const category = classifyPrompt(prompt);
-        return {
-            content: [{ type: "text", text: JSON.stringify({ category }, null, 2) }]
-        };
-    }
-);
-
-server.tool(
-    "optimize_prompt",
-    "Fully optimize user prompt using templates and strategies",
-    {
-        prompt: z.string().describe("The prompt to optimize")
-    },
-    async ({ prompt }) => {
-        const result = await optimizePrompt(prompt);
-        return {
-            content: [{
-                type: "text",
-                text: JSON.stringify({
-                    category: result.category,
-                    strategies: result.strategies,
-                    optimized_prompt: result.enhancedPrompt
-                }, null, 2)
-            }]
-        };
-    }
-);
-
-
-server.tool(
     "enhance_prompt_with_context",
     "Enhance your prompt using the full context of your ongoing project conversation",
     {
@@ -226,6 +190,45 @@ server.tool(
         };
     }
 );
+
+
+server.tool(
+    "classify_prompt",
+    "Classify user prompt category",
+    {
+        prompt: z.string().describe("The prompt to classify")
+    },
+    async ({ prompt }) => {
+        const category = classifyPrompt(prompt);
+        return {
+            content: [{ type: "text", text: JSON.stringify({ category }, null, 2) }]
+        };
+    }
+);
+
+server.tool(
+    "optimize_prompt",
+    "Fully optimize user prompt using templates and strategies",
+    {
+        prompt: z.string().describe("The prompt to optimize")
+    },
+    async ({ prompt }) => {
+        const result = await optimizePrompt(prompt);
+        return {
+            content: [{
+                type: "text",
+                text: JSON.stringify({
+                    category: result.category,
+                    strategies: result.strategies,
+                    optimized_prompt: result.enhancedPrompt
+                }, null, 2)
+            }]
+        };
+    }
+);
+
+
+
 server.tool(
     "list_sessions",
     "List all your saved project sessions",
