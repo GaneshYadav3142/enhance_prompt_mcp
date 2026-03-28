@@ -71,7 +71,7 @@ const {
 
 const server = new McpServer({
     name: "mcp-prompt-architect",
-    version: "2.0.0"
+    version: "2.1.5"
 }, {
     capabilities: { tools: {} }
 });
