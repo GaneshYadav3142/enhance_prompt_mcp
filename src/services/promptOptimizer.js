@@ -21,32 +21,6 @@ async function optimizePrompt(prompt) {
 
     const enhancedPrompt = await enhanceWithLLM(prompt, category, strategies);
 
-    // let enhancedPrompt = prompt;
-
-    // if (category === "marketing")
-    //     enhancedPrompt = marketingTemplate(prompt);
-
-    // else if (category === "blog")
-    //     enhancedPrompt = blogTemplate(prompt);
-
-    // else if (category === "technical")
-    //     enhancedPrompt = techTemplate(prompt);
-
-    // else if (category === "email")
-    //     enhancedPrompt = emailTemplate(prompt);
-
-    // strategies.forEach((strategy) => {
-
-    //     if (strategy === "role_prompt")
-    //         enhancedPrompt = applyRolePrompt(enhancedPrompt);
-
-    //     if (strategy === "chain_of_thought")
-    //         enhancedPrompt = applyChainOfThought(enhancedPrompt);
-
-    //     if (strategy === "structured_output")
-    //         enhancedPrompt = applyStructuredOutput(enhancedPrompt);
-
-    // });
 
     return {
         category,

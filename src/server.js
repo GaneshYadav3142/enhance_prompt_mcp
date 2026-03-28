@@ -193,6 +193,34 @@ server.tool(
 
 
 server.tool(
+    "list_sessions",
+    "List all your saved project sessions",
+    {},
+    async () => {
+        const sessions = listSessions();
+        if (sessions.length === 0) {
+            return {
+                content: [{
+                    type: "text",
+                    text: "No sessions yet. Call enhance_prompt_with_context with a session_id to start one."
+                }]
+            };
+        }
+        const lines = sessions.map(s => {
+            const last = new Date(s.last_active).toLocaleDateString();
+            return `• ${s.id}   (last active: ${last})`;
+        });
+        return {
+            content: [{
+                type: "text",
+                text: `Your project sessions:\n\n${lines.join("\n")}`
+            }]
+        };
+    }
+);
+
+
+server.tool(
     "classify_prompt",
     "Classify user prompt category",
     {
@@ -229,32 +257,6 @@ server.tool(
 
 
 
-server.tool(
-    "list_sessions",
-    "List all your saved project sessions",
-    {},
-    async () => {
-        const sessions = listSessions();
-        if (sessions.length === 0) {
-            return {
-                content: [{
-                    type: "text",
-                    text: "No sessions yet. Call enhance_prompt_with_context with a session_id to start one."
-                }]
-            };
-        }
-        const lines = sessions.map(s => {
-            const last = new Date(s.last_active).toLocaleDateString();
-            return `• ${s.id}   (last active: ${last})`;
-        });
-        return {
-            content: [{
-                type: "text",
-                text: `Your project sessions:\n\n${lines.join("\n")}`
-            }]
-        };
-    }
-);
 
 
 async function main() {
