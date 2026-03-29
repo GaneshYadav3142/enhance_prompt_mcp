@@ -1,6 +1,6 @@
 {
   "name": "prompt-architect-mcp",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Context-aware prompt enhancement MCP server",
   "main": "src/server.js",
   "bin": {
