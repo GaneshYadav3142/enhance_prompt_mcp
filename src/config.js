@@ -68,7 +68,7 @@ const config = {
     (hasOpenAI ? "gpt-4o-mini" : "gemini-1.5-flash"),
 
   enhancerModel: process.env.PA_ENHANCER_MODEL ??
-    (hasOpenAI ? "gpt-4o" : "gemini-1.5-pro"),
+    (hasOpenAI ? "gpt-4o" : "gemini-1.5-flash"),
 };
 
 console.error(
