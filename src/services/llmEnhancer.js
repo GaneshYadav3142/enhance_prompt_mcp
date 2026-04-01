@@ -1,3 +1,6 @@
+
+const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 // // services/llmEnhancer.js
 // const OpenAI = require("openai");
 // // Load environment variables from .env file
@@ -87,7 +90,7 @@ Return only the enhanced version of the prompt.`;
 
 // ── OpenAI ────────────────────────────────────────────────────────────────────
 async function enhanceWithOpenAI(userPrompt, category, strategies) {
-    const OpenAI = require("openai");
+
     const client = new OpenAI({ apiKey: config.openaiApiKey });
 
     const response = await client.chat.completions.create({
@@ -105,7 +108,6 @@ async function enhanceWithOpenAI(userPrompt, category, strategies) {
 
 // ── Gemini ────────────────────────────────────────────────────────────────────
 async function enhanceWithGemini(userPrompt, category, strategies) {
-    const { GoogleGenerativeAI } = require("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(config.geminiApiKey);
     const model = genAI.getGenerativeModel({ model: config.enhancerModel });
 
