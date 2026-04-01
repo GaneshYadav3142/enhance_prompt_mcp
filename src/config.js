@@ -65,10 +65,10 @@ const config = {
 
   // Models — auto-select based on provider if not explicitly set
   summariserModel: process.env.PA_SUMMARISER_MODEL ??
-    (hasOpenAI ? "gpt-4o-mini" : "gemini-1.5-flash"),
+    (hasOpenAI ? "gpt-4o-mini" : "gemini-2.5-flash"),
 
   enhancerModel: process.env.PA_ENHANCER_MODEL ??
-    (hasOpenAI ? "gpt-4o" : "gemini-1.5-flash"),
+    (hasOpenAI ? "gpt-4o" : "gemini-2.5-flash"),
 };
 
 console.error(
