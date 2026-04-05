@@ -374,7 +374,7 @@ Your project sessions:
 ```
 
 ---
-
+<!-- 
 ## SQLite storage limits
 
 Your session data is stored in `~/.prompt-architect/sessions.db`. SQLite has a maximum database size of **281 TB** — effectively unlimited for any real usage.
@@ -401,12 +401,12 @@ If you provide both keys, OpenAI is used by default because it produces better s
 | Scenario                  | Provider used     | Models                                                             |
 | ------------------------- | ----------------- | ------------------------------------------------------------------ |
 | Only `OPENAI_API_KEY` set | OpenAI            | `gpt-4o` for enhancement, `gpt-4o-mini` for summaries              |
-| Only `GEMINI_API_KEY` set | Gemini            | `gemini-1.5-pro` for enhancement, `gemini-1.5-flash` for summaries |
+| Only `GEMINI_API_KEY` set | Gemini            | `gemini-2.5-flash` for enhancement, `gemini-2.5-flash` for summaries |
 | Both keys set             | OpenAI (priority) | OpenAI models                                                      |
 
 To force Gemini when both keys are set, remove `OPENAI_API_KEY` from your config.
 
----
+--- -->
 
 ## Session ID guide
 
