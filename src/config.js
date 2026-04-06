@@ -27,12 +27,20 @@
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const dataDir = path.join(os.homedir(), ".prompt-architect");
 fs.mkdirSync(dataDir, { recursive: true });
 
 const hasOpenAI = !!process.env.OPENAI_API_KEY;
 const hasGemini = !!process.env.GEMINI_API_KEY;
+
+console.error(
+  `[prompt-architect] Configuration:\n` +
+  `  OpenAI key: ${hasOpenAI ? "FOUND" : "NOT FOUND"}\n` +
+  `  Gemini key: ${hasGemini ? "FOUND" : "NOT FOUND"}\n`
+);
 
 if (!hasOpenAI && !hasGemini) {
   console.error(
@@ -63,6 +71,9 @@ const config = {
   maxTurnsInContext: Number(process.env.PA_MAX_TURNS_IN_CONTEXT ?? 20),
   summaryEveryNTurns: Number(process.env.PA_SUMMARY_EVERY_N_TURNS ?? 5),
 
+
+  fastModel: process.env.PA_FAST_MODEL ?? (hasOpenAI ? "gpt-4o-mini" : "gemini-flash-latest"),
+  qualityModel: process.env.PA_QUALITY_MODEL ?? (hasOpenAI ? "gpt-4o" : "gemini-flash-latest"),
   // Models — auto-select based on provider if not explicitly set
   summariserModel: process.env.PA_SUMMARISER_MODEL ??
     (hasOpenAI ? "gpt-4o-mini" : "gemini-2.5-flash"),

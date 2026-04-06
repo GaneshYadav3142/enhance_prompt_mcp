@@ -57,6 +57,8 @@
 const { McpServer } = require("@modelcontextprotocol/sdk/server/mcp.js");
 const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
 const { z } = require("zod");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const { optimizePrompt } = require("./services/promptOptimizer");
 const { classifyPrompt } = require("./services/classifierService");
@@ -68,6 +70,7 @@ const {
     savePinnedFact,
     listSessions
 } = require("./session/manager");
+const { suggestNextCode, explainError, reviewCode } = require("./services/codingAssitant");
 
 const server = new McpServer({
     name: "mcp-prompt-architect",
@@ -98,6 +101,135 @@ function requireSessionId(session_id) {
     }
     return sid;
 }
+
+// ── 1. suggest_next_code ──────────────────────────────────────────────────────
+// Returns RAW CODE ONLY — no markdown, no explanation.
+// Designed to be used as ghost/inline text in the editor.
+// The editor shows this as greyed-out text after the cursor.
+server.tool(
+    "suggest_next_code",
+    "Suggest the next lines of code at cursor position — returns raw code only for ghost text display",
+    {
+        file_content: z.string().describe("Full content of the current file"),
+        cursor_line: z.number().describe("Line number where the cursor is (1-indexed)"),
+        language: z.string().describe("Programming language e.g. 'typescript', 'python', 'javascript'"),
+        session_id: z.string().optional().describe("Your project name. Auto-detected from git if omitted.")
+    },
+    async ({ file_content, cursor_line, language, session_id }) => {
+        try {
+            const sid = session_id ? resolveSessionId(session_id) : resolveSessionId();
+            let contextBlock = null;
+            if (sid) {
+                getOrCreateSession(sid);
+                contextBlock = await buildContextBlock(sid);
+            }
+
+            const suggestion = await suggestNextCode({
+                fileContent: file_content,
+                cursorLine: cursor_line,
+                language,
+                contextBlock
+            });
+
+            // Save to session so context knows what code you are writing
+            if (sid) {
+                saveTurn(sid, "user", `[code suggestion requested at line ${cursor_line} in ${language} file]`);
+                saveTurn(sid, "assistant", `[suggested]: ${suggestion.slice(0, 200)}`);
+            }
+
+            return {
+                content: [{
+                    type: "text",
+                    // Pure code — no labels, no markdown. Editor renders as ghost text.
+                    text: suggestion
+                }]
+            };
+        } catch (err) {
+            console.error("[suggest_next_code] error:", err.message);
+            return { content: [{ type: "text", text: `Error: ${err.message}` }] };
+        }
+    }
+);
+
+// ── 2. explain_error ──────────────────────────────────────────────────────────
+server.tool(
+    "explain_error",
+    "Explain an error and provide a fix tailored to your project stack",
+    {
+        error_message: z.string().describe("The full error message or stack trace"),
+        file_content: z.string().describe("Content of the file where the error occurred"),
+        language: z.string().describe("Programming language e.g. 'typescript', 'python'"),
+        session_id: z.string().optional().describe("Your project name. Auto-detected from git if omitted.")
+    },
+    async ({ error_message, file_content, language, session_id }) => {
+        try {
+            const sid = session_id ? resolveSessionId(session_id) : resolveSessionId();
+            let contextBlock = null;
+            if (sid) {
+                getOrCreateSession(sid);
+                contextBlock = await buildContextBlock(sid);
+            }
+
+            const explanation = await explainError({
+                errorMessage: error_message,
+                fileContent: file_content,
+                language,
+                contextBlock
+            });
+
+            // Save error + fix to session — next time a similar error occurs, context includes this
+            if (sid) {
+                saveTurn(sid, "user", `[error]: ${error_message.slice(0, 300)}`);
+                saveTurn(sid, "assistant", explanation.slice(0, 500));
+            }
+
+            return {
+                content: [{ type: "text", text: explanation }]
+            };
+        } catch (err) {
+            console.error("[explain_error] error:", err.message);
+            return { content: [{ type: "text", text: `Error: ${err.message}` }] };
+        }
+    }
+);
+
+// ── 3. review_code ────────────────────────────────────────────────────────────
+server.tool(
+    "review_code",
+    "Review your code against your project standards and best practices",
+    {
+        file_content: z.string().describe("The code to review"),
+        language: z.string().describe("Programming language e.g. 'typescript', 'python'"),
+        session_id: z.string().optional().describe("Your project name. Auto-detected from git if omitted.")
+    },
+    async ({ file_content, language, session_id }) => {
+        try {
+            const sid = session_id ? resolveSessionId(session_id) : resolveSessionId();
+            let contextBlock = null;
+            if (sid) {
+                getOrCreateSession(sid);
+                contextBlock = await buildContextBlock(sid);
+            }
+
+            const review = await reviewCode({ fileContent: file_content, language, contextBlock });
+
+            if (sid) {
+                saveTurn(sid, "user", `[code review requested for ${language} file, ${file_content.split("\n").length} lines]`);
+                saveTurn(sid, "assistant", review.slice(0, 500));
+            }
+
+            return {
+                content: [{ type: "text", text: review }]
+            };
+        } catch (err) {
+            console.error("[review_code] error:", err.message);
+            return { content: [{ type: "text", text: `Error: ${err.message}` }] };
+        }
+    }
+);
+
+
+
 
 server.tool(
     "enhance_prompt",
@@ -263,6 +395,10 @@ async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error("MCP Prompt Architect v2 running via Stdio");
+    console.error(
+        `[prompt-architect] Configuration:\n` +
+        `  OpenAI key: ${process.env.GEMINI_API_KEY ? `${process.env.GEMINI_API_KEY}` : "notfound"}\n`
+    );
 }
 
 main().catch((error) => {
